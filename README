@@ -1,0 +1,23 @@
+This project creates a web page from logs obtained by loggy.py 
+( http://inamidst.com/code/loggy.py ). It is also backwards compatible 
+with the logs taken by eggdrop v1.6.19. 
+
+I do not have any plans to have it be compatible with other logging formats
+as I encourage people to use Sean B. Palmer's loggy.py script.
+
+This was inspired by the pisg project.
+
+----------
+
+TO RUN:
+
+Open up stats.py and change the variables in the beginning labelled
+LOGS_LOCATION, FILE_EXTENSION, CHANNEL, and USER.
+
+In the future this script will support command line arguments instead.
+
+----------
+
+The recipe.py was obtained from a blog of which I have lost the link for.
+There wasn't a license attached with it and I'm releasing it under
+my project which is license by the GNU GPL v3.
