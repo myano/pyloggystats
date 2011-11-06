@@ -15,8 +15,8 @@ This was inspired by the pisg project.
 Run
 ------
 
-Run, ``./stats`` with the appropriate command line requirements. You can see
-necessary arguments by running ``./stats --help``.
+Run, ``./stats.py`` with the appropriate command line requirements. You can see
+necessary arguments by running ``./stats.py --help``.
 
 Please note, when specifying the channel the ``#`` needs to be escaped. Here is
 an example of how to do this:
@@ -40,6 +40,9 @@ If you are not satisfied with the default colour scheme, you can change the
 colours in the style.css folder. If you want to make your colour scheme
 available to others to use please fork this project, commit the theme and
 submit a pull request. Please place additional css files in the themes folder. 
+
+To have the ``stats.py`` file pick up on your theme make sure you change or
+rename your theme file to style.css and place it in this folder.
 
 
 License
