@@ -2,7 +2,7 @@
 
 /* body and image definitions */
 body {
-    background-color: #dedede;
+    background-color: #dedeee;
     font-family: Verdana, Arial, sans-serif;
     font-size: 13px;
     color: black;
@@ -64,20 +64,19 @@ a.background:hover {
     color: #fff;
     font-weight: bold;
     text-align: center;
-    background-color: #990000;
+    background-color: #666699;
 }
 
 .headlinebg {
-    background-color: #990000;
+    background-color: #666699;
 }
 
 .tdtop {
-    /* Colour of background for headers for tables */
-    background-color: #999999;
+    background-color: #C8C8DD;
 }
 
 .rankc {
-    background-color: #cc9999;
+    background-color: #CCCCCC;
 }
 
 .hirankc {
@@ -131,7 +130,7 @@ table.tb1 {
     border-width: 0px 0px 0px 0px;
     margin-left:auto; 
     margin-right:auto;
-    background-color: #990000;
+    background-color: #666699;
 }
 table.tb2 {
     border-width: 0px 0px 0px 0px;
@@ -154,7 +153,7 @@ table.tb4 {
     margin-left:auto; 
     margin-right:auto;
     border: 1px solid #000;
-    background-color: #990000;
+    background-color: #666699;
     color: #fff;
 }
 table.tb6 {
@@ -167,13 +166,13 @@ table.tb6 {
 
 /* COLOURS */
 .c1 {
-    background-color: #ccc;
+    background-color: #c1c1d6;
 }
 .bf {
-    background-color: #ccc;
+    background-color: #bfbfd7;
 }
 .bb {
-    background-color: #ccc;
+    background-color: #bbbbdb;
 }
 
 /* MISC */
