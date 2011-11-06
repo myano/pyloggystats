@@ -33,6 +33,15 @@ running at least this version of Python. This script does not work in Python
 If you need help, please feel free to contact me.
 
 
+Theming
+-------
+
+If you are not satisfied with the default colour scheme, you can change the
+colours in the style.css folder. If you want to make your colour scheme
+available to others to use please fork this project, commit the theme and
+submit a pull request. Please place additional css files in the themes folder. 
+
+
 License
 -------
 
