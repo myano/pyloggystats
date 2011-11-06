@@ -25,18 +25,14 @@ loggy.py -- http://inamidst.com/code/loggy.py (created by Sean B. Palmer)
 The idea was inspired by the pisg project.
 """
 
-LOGS_LOCATION = "/home/yano/yanovich.net/public/logs/"
-FILE_EXTENSION = "txt"
-CHANNEL = "#osu_osc"
-USER = 'yano'
-
-from StringIO import StringIO
+import argparse
 import datetime
+import os
 import random
 import re
-import os
-import string
 import recipe
+import string
+from StringIO import StringIO
 
 class Stats():
     def __init__(self):
@@ -54,16 +50,30 @@ class Stats():
         self.days = 0
         self.user_hours = {}
         self.avg_chars = {}
+        self.user = ""
+        self.channel = ""
+        self.file_extension = ""
+        self.logs_location = ""
+
+    def check_for_logs(self):
+        a = 0
+        for each in os.listdir(self.logs_location):
+            if each.lower().endswith(self.file_extension):
+                a += 1
+        if a == 0:
+            return False
+        else:
+            return True
 
     def load_lines(self):
         """
         This function loads data into several class-wide available variables
         for later computation.
         """
-        for each in os.listdir(LOGS_LOCATION):
+        for each in os.listdir(self.logs_location):
             self.days += 1
-            if each.lower().endswith(FILE_EXTENSION):
-                fn = open(LOGS_LOCATION + each, 'r')
+            if each.lower().endswith(self.file_extension):
+                fn = open(self.logs_location + each, 'r')
                 for eachline in fn:
                     eachline = eachline.lstrip()
                     ## loads regular text lines regardless of new or old
@@ -71,7 +81,7 @@ class Stats():
                     result_new = self.re_newstyle.findall(eachline)
                     result_old = self.re_oldstyle.findall(eachline)
                     if result_new:
-                        ## NEW-STYLE
+                        ## NEW-STYLE -- http://inamidst.com/code/loggy.py
                         if eachline[9] == "*":
                             ## quit, part, joined, is nick change
                             if eachline[9:12] == "***":
@@ -80,7 +90,6 @@ class Stats():
                                 nick = eachline[13:idx].lower()
                                 if nick.startswith("+") or nick.startswith("@"):
                                     nick = nick[1:]
-
                                 if nick not in self.nick_jpq:
                                     self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
                                 if "has parted" in eachline:
@@ -135,12 +144,12 @@ class Stats():
                                 self.lines_of_each_nick[nick][tstamp] = eachline[12 + len(nick):-1]
 
                     elif result_old:
-                        ## OLD-STYLE
+                        ## OLD-STYLE -- eggdrop v1.6.19
                         topic_changed = self.re_oldstyle_topic.findall(eachline)
-                        joined_string = " joined " + CHANNEL + "."
-                        part_string = " left " + CHANNEL
+                        joined_string = " joined " + self.channel + "."
+                        part_string = " left " + self.channel
                         quit_string = " left irc:"
-                        mode_change = CHANNEL + ": mode change"
+                        mode_change = self.channel + ": mode change"
                         if eachline[8] == "<":
                             ## regular line
                             idx = eachline.find(">", 8)
@@ -184,6 +193,7 @@ class Stats():
                                 self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["JOIN"] += 1
                         elif part_string in eachline:
+                            ## someone parted
                             idx = eachline.find(" ", 8)
                             nick = eachline[8:idx].lower()
                             if nick.startswith("+") or nick.startswith("@"):
@@ -192,6 +202,7 @@ class Stats():
                                 self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["PART"] += 1
                         elif quit_string in eachline:
+                            ## someone quited
                             idx = eachline.find(" ", 8)
                             nick = eachline[8:idx].lower()
                             if nick.startswith("+") or nick.startswith("@"):
@@ -199,7 +210,8 @@ class Stats():
                             if nick not in self.nick_jpq:
                                 self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["QUIT"] += 1
-                        elif " kicked from %s by " % (CHANNEL) in eachline:
+                        elif " kicked from %s by " % (self.channel) in eachline:
+                            ## someone was kicked
                             idx = eachline.find(" ", 8)
                             nick = eachline[8:idx].lower()
                             if nick.startswith("+") or nick.startswith("@"):
@@ -219,7 +231,6 @@ class Stats():
                     else:
                         ## blank line, do nothing
                         pass
-                        #print eachline
                 fn.close()
 
     def find_number_of_nicks(self):
@@ -229,7 +240,6 @@ class Stats():
         return self.lines_of_each_nick.keys()
 
     def number_of_lines_per_hour(self):
-        #nicks = list_of_nicks
         for nick in self.lines_of_each_nick:
             for line in self.lines_of_each_nick[nick]:
                 hour = int(line[11:13])
@@ -240,6 +250,8 @@ class Stats():
     def sortdicts(self, x, y):
         return len(self.lines_of_each_nick[x]) - len(self.lines_of_each_nick[y])
 
+    def sortdicts_chars(self, x, y):
+        return int(self.avg_chars[x] - self.avg_chars[y])
 
     def high_score_cmp(self, x, y):
         if self.hours[x] < self.hours[y]:
@@ -271,14 +283,13 @@ class Stats():
                 if hour not in self.user_hours[nick]:
                     self.user_hours[nick][hour] = 0
                 self.user_hours[nick][hour] += 1
-        #print self.user_hours
 
     def generate_webpage(self):
         self.delete_existing_html()
         page_file = open("index.html", "w")
         dt = recipe.doctype()
         page_file.write(str(dt))
-        TITLE = CHANNEL + " IRC stats"
+        TITLE = self.channel + " IRC stats"
         css = '<link href ="style.css" rel="stylesheet" type="text/css" />\n'
         head = recipe.head(recipe.utf8() + recipe.title(TITLE) + css)
 
@@ -287,14 +298,14 @@ class Stats():
         div1 = recipe.div("",Class="centered")
 
         ## beginning information
-        div1 <= recipe.span("#osu_osc @ Freenode stats by %s" % (USER),Class="title")
+        div1 <= recipe.span("#osu_osc @ Freenode stats by %s" % (self.user),Class="title")
         div1 <= recipe.br()
         ct = str(datetime.datetime.utcnow())
         div1 <= recipe.br()
         div1 <= "\nStatistics generated on %s UTC\n" % (ct)
 
         div1 <= recipe.br()
-        div1 <= "During this %d-day reporting period, a total of <b>%d</b> different nicks were represented on %s." % (self.days, len(self.lines_of_each_nick), CHANNEL)
+        div1 <= "During this %d-day reporting period, a total of <b>%d</b> different nicks were represented on %s." % (self.days, len(self.lines_of_each_nick), self.channel)
         div1 <= recipe.br()
         div1 <= recipe.br()
         tb1 = recipe.table(Class="tb4")
@@ -404,8 +415,6 @@ class Stats():
 
             TOTAL = BLUE + GREEN + YELLOW + RED
 
-            #print BLUE, GREEN, YELLOW, RED, TOTAL
-
             bpercent = float(BLUE)/TOTAL * 38
             gpercent = float(GREEN)/TOTAL * 38
             ypercent = float(YELLOW)/TOTAL * 38
@@ -431,11 +440,42 @@ class Stats():
             k += 1
         div1 <= tb5
 
+        ## header for Nicks with longest lines
+        div1 <= recipe.br()
+        tb4 = recipe.table(Class="tb4")
+        tr4a = recipe.tr(recipe.td("Nicks with Longset Lines", Class="headertext"))
+        tb4 <= tr4a
+        div1 <= tb4
+        div1 <= recipe.br()
+
+        ## ranking for avg_chars_per_user
+        tb6 = recipe.table(Class="tb6")
+        c = sorted(self.avg_chars, cmp=self.sortdicts_chars)
+        c.reverse()
+        j = 0
+
+        tb6_tr1 = recipe.tr()
+        tb6_tr1 <= recipe.td("&nbsp;")
+        tb6_tr1 <= recipe.td("<strong>Nick</strong>", Class="tdtop")
+        tb6_tr1 <= recipe.td("<strong>Avg Chars Per Line</strong>",Class="tdtop")
+        tb6 <= tb6_tr1
+
+        while j < 10:
+            tr_temp = recipe.tr()
+            nick = c[j]
+            chars_per_line_per_user = self.avg_chars[nick]
+            tr_temp <= recipe.td("%d" % (j+1), Class="rankc")
+            tr_temp <= recipe.td("%s" % (nick), Class="c1")
+            tr_temp <= recipe.td("%d" % (chars_per_line_per_user), Class="bf")
+            tb6 <= tr_temp
+            j += 1
+        div1 <= tb6
+
         spn = recipe.span(Class='small')
         spn <= recipe.br()
-        spn <= "Stats generated by yano.\n"
+        spn <= "Stats generator by <a href='https://yanovich.net/'>yano</a>.\n"
         spn <= recipe.br()
-        spn <= 'Themeing heavily borrowed from the pisg project: <a href="http://pisg.sourceforge.net/">pisg</a>.\n'
+        spn <= 'Theming heavily borrowed from the pisg project: <a href="http://pisg.sourceforge.net/">pisg</a>.\n'
         spn <= recipe.br()
         spn <= 'pisg by <a href="http://mbrix.dk/" title="Go to the authors homepage" class="background">Morten Brix Pedersen</a> and others\n'
         div1 <= spn
@@ -450,19 +490,44 @@ class Stats():
         output.close()
 
 
-stats = Stats()
-
 def main():
     """
     Main function
     """
+
+    """
+    stats = Stats()
     stats.load_lines()
     stats.number_of_lines_per_hour()
     stats.avg_chars_per_line_per_user()
-    #stats.percent_lines_per_hour()
     stats.generate_webpage()
-    #print stats.avg_chars_per_line_per_user()
+    """
+    ## parser code
+    parser = argparse.ArgumentParser(description="The script makes an HTML page from IRC logs.")
+    parser.add_argument('-u', action='store', required=True, dest="user",
+            help="specifies the user who is creating the logs.")
+    parser.add_argument('-c', action='store', required=True, dest="channel",
+            help="specifies the IRC channel of the logs.")
+    parser.add_argument('-e', action='store', required=True, dest="file_extension",
+            help="specifies the file extension of the IRC logs.")
+    parser.add_argument('-l', action='store', required=True, dest="log_location",
+            help="specifies the location of the IRC logs.")
+    results = parser.parse_args()
+
+    if results.user and results.channel and results.file_extension and results.log_location:
+        stats = Stats()
+        stats.user = results.user
+        stats.channel = results.channel
+        stats.file_extension = results.file_extension
+        stats.logs_location = results.log_location
+
+        ## start computing
+        if stats.check_for_logs():
+            stats.load_lines()
+            stats.number_of_lines_per_hour()
+            stats.avg_chars_per_line_per_user()
+            stats.generate_webpage()
 
 if __name__ == '__main__':
     main()
-    print "Success, running main()!"
+    #print "Success, running main()!"

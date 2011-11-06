@@ -181,7 +181,13 @@ table.tb4 {
     background-color: #666699;
     color: #fff;
 }
-
+table.tb6 {
+    border-width: 0px 0px 0px 0px;
+    text-align: center;
+    width: 200px;
+    margin-left:auto;
+    margin-right:auto;
+}
 img.bars {
     width: 40px;
     height: 15px;
