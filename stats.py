@@ -46,7 +46,7 @@ class Stats():
         self.dict_of_topics = {}
         self.kicks = {}
         self.hours = {}
-        self.hours_percent= {}
+        self.hours_percent = {}
         self.days = 0
         self.user_hours = {}
         self.avg_chars = {}
