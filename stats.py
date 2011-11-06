@@ -495,13 +495,6 @@ def main():
     Main function
     """
 
-    """
-    stats = Stats()
-    stats.load_lines()
-    stats.number_of_lines_per_hour()
-    stats.avg_chars_per_line_per_user()
-    stats.generate_webpage()
-    """
     ## parser code
     parser = argparse.ArgumentParser(description="The script makes an HTML page from IRC logs.")
     parser.add_argument('-u', action='store', required=True, dest="user",
