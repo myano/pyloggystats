@@ -54,6 +54,7 @@ class Stats():
         self.channel = ""
         self.file_extension = ""
         self.logs_location = ""
+        self.stats_location = ""
 
     def check_for_logs(self):
         a = 0
@@ -73,7 +74,11 @@ class Stats():
         for each in os.listdir(self.logs_location):
             self.days += 1
             if each.lower().endswith(self.file_extension):
-                fn = open(self.logs_location + each, 'r')
+                try:
+                    fn = open(self.logs_location + each, 'r')
+                except:
+                    print "Could not open", self.logs_location + each
+                    continue
                 for eachline in fn:
                     eachline = eachline.lstrip()
                     ## loads regular text lines regardless of new or old
@@ -262,8 +267,12 @@ class Stats():
             return 0
 
     def delete_existing_html(self):
-        if os.path.isfile("index.html"):
-            os.remove("index.html")
+        loc = self.stats_location + "/index.html"
+        if os.path.exists(loc):
+            try:
+                os.remove(loc)
+            except:
+                print "Unable to remove old index.html:", loc
 
     def avg_chars_per_line_per_user(self):
         results = {}
@@ -286,7 +295,12 @@ class Stats():
 
     def generate_webpage(self):
         self.delete_existing_html()
-        page_file = open("index.html", "w")
+        loc = self.stats_location + "/index.html"
+        try:
+            page_file = open(loc, "w")
+        except:
+            print "Could not open for writing:", loc
+            return
         dt = recipe.doctype()
         page_file.write(str(dt))
         TITLE = self.channel + " IRC stats"
@@ -505,21 +519,31 @@ def main():
             help="specifies the file extension of the IRC logs.")
     parser.add_argument('-l', action='store', required=True, dest="log_location",
             help="specifies the location of the IRC logs.")
+    parser.add_argument('-s', action='store', dest="stats_location",
+            help="specifies the location of the index.html")
     results = parser.parse_args()
 
-    if results.user and results.channel and results.file_extension and results.log_location:
-        stats = Stats()
-        stats.user = results.user
-        stats.channel = results.channel
-        stats.file_extension = results.file_extension
-        stats.logs_location = results.log_location
+    stats = Stats()
+    stats.user = results.user
+    stats.channel = results.channel
+    stats.file_extension = results.file_extension
+    stats.logs_location = results.log_location
+    if results.stats_location:
+        stats.stats_location = results.stats_location
+    else:
+        if not os.path.exists(stats.logs_location + "/stats/"):
+            try:
+                os.mkdir(stats.logs_location + "/stats/")
+            except:
+                print "Failed to create folder 'stats' in, ", stats.logs_location
+        stats.stats_location = stats.logs_location + "/stats/"
 
-        ## start computing
-        if stats.check_for_logs():
-            stats.load_lines()
-            stats.number_of_lines_per_hour()
-            stats.avg_chars_per_line_per_user()
-            stats.generate_webpage()
+    ## start computing
+    if stats.check_for_logs():
+        stats.load_lines()
+        stats.number_of_lines_per_hour()
+        stats.avg_chars_per_line_per_user()
+        stats.generate_webpage()
 
 if __name__ == '__main__':
     main()
