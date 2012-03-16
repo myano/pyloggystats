@@ -312,7 +312,7 @@ class Stats():
         div1 = recipe.div("",Class="centered")
 
         ## beginning information
-        div1 <= recipe.span("#osu_osc @ Freenode stats by %s" % (self.user),Class="title")
+        div1 <= recipe.span("%s @ Freenode stats by %s" % (self.channel, self.user),Class="title")
         div1 <= recipe.br()
         ct = str(datetime.datetime.utcnow())
         div1 <= recipe.br()
@@ -342,7 +342,7 @@ class Stats():
             elif q < 18:
                 colour = "yellow"
             elif q < 24:
-                colour = 'red'
+                colour = "red"
             percent = float(self.hours[hour])/TOTAL*100.0
             height = 12.2 * percent
             alt = self.hours[hour]
