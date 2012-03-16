@@ -329,12 +329,12 @@ class Stats():
         ## Most Active Times
         tb2 = recipe.table(Class='tb2')
         tr2 = recipe.tr()
-        q = -1
+        # q = -1
         TOTAL = 0
         for hour in self.hours:
             TOTAL += self.hours[hour]
         for hour in self.hours:
-            q += 1
+            q = hour
             if q < 6:
                 colour = "blue"
             elif q < 12:
