@@ -457,7 +457,7 @@ class Stats():
         ## header for Nicks with longest lines
         div1 <= recipe.br()
         tb4 = recipe.table(Class="tb4")
-        tr4a = recipe.tr(recipe.td("Nicks with Longset Lines", Class="headertext"))
+        tr4a = recipe.tr(recipe.td("Nicks with Longest Lines", Class="headertext"))
         tb4 <= tr4a
         div1 <= tb4
         div1 <= recipe.br()
