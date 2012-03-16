@@ -45,7 +45,7 @@ class Stats():
         self.nick_mes = {}
         self.dict_of_topics = {}
         self.kicks = {}
-        self.hours = {}
+        self.hours = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0 }
         self.hours_percent = {}
         self.days = 0
         self.user_hours = {}
