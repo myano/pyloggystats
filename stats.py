@@ -90,7 +90,8 @@ class Stats():
                     result_new = self.re_newstyle.findall(eachline)
                     result_old = self.re_oldstyle.findall(eachline)
                     if result_new:
-                        ## NEW-STYLE -- http://inamidst.com/code/loggy.py
+                        ## NEW-STYLE
+                        ## http://go.osu.edu/loggy
                         if eachline[9] == "*":
                             ## quit, part, joined, is nick change
                             if eachline[9:12] == "***":
