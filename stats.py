@@ -53,6 +53,7 @@ class Stats():
         self.days = 0
         self.user_hours = dict()
         self.avg_chars = dict()
+        self.words_per_nick = dict()
         self.user = ""
         self.channel = ""
         self.file_extension = ""
@@ -302,6 +303,16 @@ class Stats():
             results[nick] = float(tmp) / len(self.lines_of_each_nick[nick])
         self.avg_chars = results
 
+    def number_of_words_per_nick(self):
+        re_word = re.compile(r"(\w+)")
+        for nick in self.lines_of_each_nick:
+            if nick not in self.words_per_nick:
+                self.words_per_nick[nick] = 0
+            for ts in self.lines_of_each_nick[nick]:
+                temp = self.lines_of_each_nick[nick][ts]
+                num_of_words = len(re_word.findall(temp))
+                self.words_per_nick[nick] += num_of_words
+
     def generate_lines_per_hour_per_user(self):
         for nick in self.lines_of_each_nick:
             if nick not in self.user_hours:
@@ -315,6 +326,7 @@ class Stats():
     def generate_webpage(self):
         self.delete_existing_html()
         loc = self.stats_location + "/index.html"
+        self.number_of_words_per_nick()
         try:
             page_file = open(loc, "w")
         except:
@@ -418,6 +430,7 @@ class Stats():
         tb5_tr1 <= recipe.td("<strong>Nick</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Number of lines</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>When?</strong>", Class="tdtop")
+        tb5_tr1 <= recipe.td("<strong>Num of words</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Last Seen</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Random Quote</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Avg Char Per Line</strong>",
@@ -428,7 +441,7 @@ class Stats():
         b = sorted(self.lines_of_each_nick, cmp=self.sortdicts)
         b.reverse()
 
-        while k < 30:
+        while k < 25:
             nick = b[k]
             num_of_lines = len(self.lines_of_each_nick[nick])
             ## find most recent line:
@@ -476,6 +489,7 @@ class Stats():
                         alt="%d" title="%d" />' % (var, li_vars[var][0],
                                 li_vars[var][0], li_vars[var][1])
             tb5_tr2 <= tb5_td1
+            tb5_tr2 <= recipe.td(str(self.words_per_nick[nick]), Class="bf")
             list_of_nick_lines = [self.lines_of_each_nick[nick][each] for \
                     each in self.lines_of_each_nick[nick]]
             tb5_tr2 <= recipe.td("%s" % (diff), Class="bf")  # last seen
