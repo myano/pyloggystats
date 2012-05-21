@@ -34,22 +34,25 @@ import recipe
 import string
 from StringIO import StringIO
 
+
 class Stats():
     def __init__(self):
-        self.lines_of_each_nick = {}
+        self.lines_of_each_nick = dict()
         #self.re_nick = re.compile(r"\s<([\S]+)>\s")
         self.re_newstyle = re.compile(r"^\d\d:\d\d:\d\d")
         self.re_oldstyle = re.compile(r"^\[\d\d:\d\d\]")
         self.re_oldstyle_topic = re.compile(r'^\[\d.*\sTopic\schanged.*:\s')
-        self.nick_jpq = {}
-        self.nick_mes = {}
-        self.dict_of_topics = {}
-        self.kicks = {}
-        self.hours = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0 }
-        self.hours_percent = {}
+        self.nick_jpq = dict()
+        self.nick_mes = dict()
+        self.dict_of_topics = dict()
+        self.kicks = dict()
+        self.hours = dict()
+        for x in range(0, 24):
+            self.hours[x] = 0
+        self.hours_percent = dict()
         self.days = 0
-        self.user_hours = {}
-        self.avg_chars = {}
+        self.user_hours = dict()
+        self.avg_chars = dict()
         self.user = ""
         self.channel = ""
         self.file_extension = ""
@@ -93,10 +96,12 @@ class Stats():
                                 ### quit, part or join
                                 idx = eachline.find(" ", 13)
                                 nick = eachline[13:idx].lower()
-                                if nick.startswith("+") or nick.startswith("@"):
+                                if nick.startswith("+") \
+                                        or nick.startswith("@"):
                                     nick = nick[1:]
                                 if nick not in self.nick_jpq:
-                                    self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
+                                    self.nick_jpq[nick] = {"PART": 0,
+                                            "JOIN": 0, "QUIT": 0}
                                 if "has parted" in eachline:
                                     self.nick_jpq[nick]["PART"] += 1
                                 elif "has joined" in eachline:
@@ -110,14 +115,17 @@ class Stats():
                                 ## and have a var for how many me's
                                 idx = eachline.find(" ", 11)
                                 nick = eachline[11:idx].lower()
-                                if nick.startswith("+") or nick.startswith("@"):
+                                if nick.startswith("+") \
+                                        or nick.startswith("@"):
                                     nick = nick[1:]
                                 tstamp = each[:-4] + " " + eachline[:8]
                                 if nick not in self.lines_of_each_nick:
-                                    self.lines_of_each_nick[nick] = {}
+                                    self.lines_of_each_nick[nick] = dict()
                                 if tstamp not in self.lines_of_each_nick[nick]:
-                                    self.lines_of_each_nick[nick][tstamp] = []
-                                self.lines_of_each_nick[nick][tstamp] = eachline[11 + len(nick):-1]
+                                    self.lines_of_each_nick[nick][tstamp] = \
+                                            list()
+                                self.lines_of_each_nick[nick][tstamp] = \
+                                        eachline[11 + len(nick):-1]
                                 if nick not in self.nick_mes:
                                     self.nick_mes[nick] = 0
                                 self.nick_mes[nick] += 1
@@ -143,14 +151,17 @@ class Stats():
                                 ## regular text
                                 tstamp = each[:-4] + " " + eachline[:8]
                                 if nick not in self.lines_of_each_nick:
-                                    self.lines_of_each_nick[nick] = {}
+                                    self.lines_of_each_nick[nick] = dict()
                                 if tstamp not in self.lines_of_each_nick[nick]:
-                                    self.lines_of_each_nick[nick][tstamp] = []
-                                self.lines_of_each_nick[nick][tstamp] = eachline[12 + len(nick):-1]
+                                    self.lines_of_each_nick[nick][tstamp] = \
+                                            list()
+                                self.lines_of_each_nick[nick][tstamp] = \
+                                        eachline[12 + len(nick):-1]
 
                     elif result_old:
                         ## OLD-STYLE -- eggdrop v1.6.19
-                        topic_changed = self.re_oldstyle_topic.findall(eachline)
+                        topic_changed = \
+                                self.re_oldstyle_topic.findall(eachline)
                         joined_string = " joined " + self.channel + "."
                         part_string = " left " + self.channel
                         quit_string = " left irc:"
@@ -163,10 +174,11 @@ class Stats():
                                 nick = nick[1:]
                             tstamp = each[:-4] + " " + eachline[1:6]
                             if nick not in self.lines_of_each_nick:
-                                self.lines_of_each_nick[nick] = {}
+                                self.lines_of_each_nick[nick] = dict()
                             if tstamp not in self.lines_of_each_nick[nick]:
-                                self.lines_of_each_nick[nick][tstamp] = []
-                            self.lines_of_each_nick[nick][tstamp] = eachline[11 + len(nick):-1]
+                                self.lines_of_each_nick[nick][tstamp] = list()
+                            self.lines_of_each_nick[nick][tstamp] = \
+                                    eachline[11 + len(nick):-1]
                         elif eachline[8:15] == "Action:":
                             ## /me's
                             idx = eachline.find(" ", 16)
@@ -175,10 +187,12 @@ class Stats():
                                 nick = nick[1:]
                             tstamp = each[:-4] + " " + eachline[1:6]
                             if nick not in self.lines_of_each_nick:
-                                self.lines_of_each_nick[nick] = {}
+                                self.lines_of_each_nick[nick] = dict()
                             if tstamp not in self.lines_of_each_nick[nick]:
-                                    self.lines_of_each_nick[nick][tstamp] = []
-                            self.lines_of_each_nick[nick][tstamp] = eachline[16 + len(nick):-1]
+                                    self.lines_of_each_nick[nick][tstamp] = \
+                                            list()
+                            self.lines_of_each_nick[nick][tstamp] = \
+                                    eachline[16 + len(nick):-1]
                             if nick not in self.nick_mes:
                                 self.nick_mes[nick] = 0
                             self.nick_mes[nick] += 1
@@ -195,7 +209,8 @@ class Stats():
                             if nick.startswith("+") or nick.startswith("@"):
                                 nick = nick[1:]
                             if nick not in self.nick_jpq:
-                                self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
+                                self.nick_jpq[nick] = {"PART": 0,
+                                        "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["JOIN"] += 1
                         elif part_string in eachline:
                             ## someone parted
@@ -204,7 +219,8 @@ class Stats():
                             if nick.startswith("+") or nick.startswith("@"):
                                 nick = nick[1:]
                             if nick not in self.nick_jpq:
-                                self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
+                                self.nick_jpq[nick] = {"PART": 0,
+                                        "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["PART"] += 1
                         elif quit_string in eachline:
                             ## someone quited
@@ -213,9 +229,11 @@ class Stats():
                             if nick.startswith("+") or nick.startswith("@"):
                                 nick = nick[1:]
                             if nick not in self.nick_jpq:
-                                self.nick_jpq[nick] = {"PART": 0, "JOIN": 0, "QUIT": 0}
+                                self.nick_jpq[nick] = {"PART": 0,
+                                        "JOIN": 0, "QUIT": 0}
                             self.nick_jpq[nick]["QUIT"] += 1
-                        elif " kicked from %s by " % (self.channel) in eachline:
+                        elif " kicked from %s by " % (self.channel) \
+                                in eachline:
                             ## someone was kicked
                             idx = eachline.find(" ", 8)
                             nick = eachline[8:idx].lower()
@@ -253,7 +271,8 @@ class Stats():
                 self.hours[hour] += 1
 
     def sortdicts(self, x, y):
-        return len(self.lines_of_each_nick[x]) - len(self.lines_of_each_nick[y])
+        return len(self.lines_of_each_nick[x]) - \
+                len(self.lines_of_each_nick[y])
 
     def sortdicts_chars(self, x, y):
         return int(self.avg_chars[x] - self.avg_chars[y])
@@ -275,7 +294,7 @@ class Stats():
                 print "Unable to remove old index.html:", loc
 
     def avg_chars_per_line_per_user(self):
-        results = {}
+        results = dict()
         for nick in self.lines_of_each_nick:
             tmp = 0
             for line in self.lines_of_each_nick[nick]:
@@ -286,7 +305,7 @@ class Stats():
     def generate_lines_per_hour_per_user(self):
         for nick in self.lines_of_each_nick:
             if nick not in self.user_hours:
-                self.user_hours[nick] = {}
+                self.user_hours[nick] = dict()
             for line in self.lines_of_each_nick[nick]:
                 hour = line[11:13]
                 if hour not in self.user_hours[nick]:
@@ -309,17 +328,20 @@ class Stats():
 
         ## CSS
         body = recipe.body()
-        div1 = recipe.div("",Class="centered")
+        div1 = recipe.div("", Class="centered")
 
         ## beginning information
-        div1 <= recipe.span("%s @ Freenode stats by %s" % (self.channel, self.user),Class="title")
+        div1 <= recipe.span("%s @ Freenode stats by %s" % (self.channel,
+            self.user), Class="title")
         div1 <= recipe.br()
         ct = str(datetime.datetime.utcnow())
         div1 <= recipe.br()
         div1 <= "\nStatistics generated on %s UTC\n" % (ct)
 
         div1 <= recipe.br()
-        div1 <= "During this %d-day reporting period, a total of <b>%d</b> different nicks were represented on %s." % (self.days, len(self.lines_of_each_nick), self.channel)
+        div1 <= "During this %d-day reporting period,\
+                a total of <b>%d</b> different nicks were represented on\
+                %s." % (self.days, len(self.lines_of_each_nick), self.channel)
         div1 <= recipe.br()
         div1 <= recipe.br()
         tb1 = recipe.table(Class="tb4")
@@ -343,18 +365,20 @@ class Stats():
                 colour = "yellow"
             elif q < 24:
                 colour = "red"
-            percent = float(self.hours[hour])/TOTAL*100.0
+            percent = float(self.hours[hour]) / TOTAL * 100.0
             height = 12.2 * percent
             alt = self.hours[hour]
-            src = '{0:.2f}% <br><img src="images/{1}-v.png" style="width:15px; height: {2}px;" alt="{3}" title="{3}" />'.format(percent, colour, height, alt)
-            td = recipe.td(src,Class="asmall2")
+            src = '{0:.2f}% <br><img src="images/{1}-v.png" style="width:15px;\
+                    height: {2}px;" alt="{3}" title="{3}" />'.format(percent,
+                            colour, height, alt)
+            td = recipe.td(src, Class="asmall2")
             tr2 <= td
 
         tb2 <= tr2
 
         high_ranking_list = sorted(self.hours, cmp=self.high_score_cmp)
         tr3 = recipe.tr()
-        for x in range(0,24):
+        for x in range(0, 24):
             if x == high_ranking_list[0]:
                 td_temp = recipe.td("%d" % (x), Class='hirankc10center')
             else:
@@ -366,10 +390,14 @@ class Stats():
 
         tb3 = recipe.table(Class="tb3")
         tr3a = recipe.tr()
-        tr3a <= recipe.td('<img src="images/blue-h.png" alt="0-5" class="bars" /> = 0-5',Class="asmall")
-        tr3a <= recipe.td('<img src="images/green-h.png" alt="6-11" class="bars" /> = 6-11',Class="asmall")
-        tr3a <= recipe.td('<img src="images/yellow-h.png" alt="12-17" class="bars" /> = 12-17',Class="asmall")
-        tr3a <= recipe.td('<img src="images/red-h.png" alt="18-23" class="bars" /> = 18-23',Class="asmall")
+        tr3a <= recipe.td('<img src="images/blue-h.png" alt="0-5"\
+                class="bars" /> = 0-5', Class="asmall")
+        tr3a <= recipe.td('<img src="images/green-h.png" alt="6-11"\
+                class="bars" /> = 6-11', Class="asmall")
+        tr3a <= recipe.td('<img src="images/yellow-h.png" alt="12-17"\
+                class="bars" /> = 12-17', Class="asmall")
+        tr3a <= recipe.td('<img src="images/red-h.png" alt="18-23"\
+                class="bars" /> = 18-23', Class="asmall")
         tb3 <= tr3a
         div1 <= tb3
         ## END OF TABLE3
@@ -388,11 +416,12 @@ class Stats():
         tb5_tr1 = recipe.tr()
         tb5_tr1 <= recipe.td("&nbsp;")
         tb5_tr1 <= recipe.td("<strong>Nick</strong>", Class="tdtop")
-        tb5_tr1 <= recipe.td("<strong>Number of lines</strong>",Class="tdtop")
+        tb5_tr1 <= recipe.td("<strong>Number of lines</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>When?</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Last Seen</strong>", Class="tdtop")
         tb5_tr1 <= recipe.td("<strong>Random Quote</strong>", Class="tdtop")
-        tb5_tr1 <= recipe.td("<strong>Avg Char Per Line</strong>", Class="tdtop")
+        tb5_tr1 <= recipe.td("<strong>Avg Char Per Line</strong>",
+                Class="tdtop")
         tb5 <= tb5_tr1
 
         k = 0
@@ -406,11 +435,12 @@ class Stats():
             a = sorted(self.lines_of_each_nick[nick].iterkeys())
             g = a[-1].split("-")
             year, month, day = int(g[0]), int(g[1]), int(g[2][:2])
-            diff = datetime.datetime(year, month, day) - datetime.datetime.today()
+            diff = datetime.datetime(year, month,
+                    day) - datetime.datetime.today()
             diff = str(diff).split(",")[0]
             diff = diff.replace("-1 day", "today")
             tb5_tr2 = recipe.tr()
-            tb5_tr2 <= recipe.td("%d" % (k+1), Class="rankc")
+            tb5_tr2 <= recipe.td("%d" % (k + 1), Class="rankc")
             tb5_tr2 <= recipe.td("%s" % (nick), Class="c1")
             tb5_tr2 <= recipe.td("%d" % (num_of_lines), Class="bf")
 
@@ -429,10 +459,10 @@ class Stats():
 
             TOTAL = BLUE + GREEN + YELLOW + RED
 
-            bpercent = float(BLUE)/TOTAL * 38
-            gpercent = float(GREEN)/TOTAL * 38
-            ypercent = float(YELLOW)/TOTAL * 38
-            rpercent = float(RED)/TOTAL * 38
+            bpercent = float(BLUE) / TOTAL * 38
+            gpercent = float(GREEN) / TOTAL * 38
+            ypercent = float(YELLOW) / TOTAL * 38
+            rpercent = float(RED) / TOTAL * 38
 
             ## chart column
             li_vars = {"blue": [bpercent, BLUE],
@@ -442,12 +472,15 @@ class Stats():
                     }
             tb5_td1 = recipe.td(Class="bb")
             for var in ["blue", "green", "yellow", "red"]:
-                tb5_td1 <= '<img src="images/%s-h.png" width="%d" height="15" alt="%d" title="%d" />' % (var, li_vars[var][0], li_vars[var][0], li_vars[var][1])
+                tb5_td1 <= '<img src="images/%s-h.png" width="%d" height="15"\
+                        alt="%d" title="%d" />' % (var, li_vars[var][0],
+                                li_vars[var][0], li_vars[var][1])
             tb5_tr2 <= tb5_td1
-            list_of_nick_lines = [self.lines_of_each_nick[nick][each] for each in \
-                    self.lines_of_each_nick[nick]]
-            tb5_tr2 <= recipe.td("%s" % (diff), Class="bf") ## last seen
-            tb5_tr2 <= recipe.td("%s" % (random.choice(list_of_nick_lines)),Class = "bf") ## random quote
+            list_of_nick_lines = [self.lines_of_each_nick[nick][each] for \
+                    each in self.lines_of_each_nick[nick]]
+            tb5_tr2 <= recipe.td("%s" % (diff), Class="bf")  # last seen
+            tb5_tr2 <= recipe.td("%s" % (random.choice(list_of_nick_lines)),
+                    Class="bf")  # random quote
             tb5_tr2 <= recipe.td("%.2f" % (self.avg_chars[nick]), Class="bf")
             tb5 <= tb5_tr2
 
@@ -457,7 +490,8 @@ class Stats():
         ## header for Nicks with longest lines
         div1 <= recipe.br()
         tb4 = recipe.table(Class="tb4")
-        tr4a = recipe.tr(recipe.td("Nicks with Longest Lines", Class="headertext"))
+        tr4a = recipe.tr(recipe.td("Nicks with Longest Lines",
+            Class="headertext"))
         tb4 <= tr4a
         div1 <= tb4
         div1 <= recipe.br()
@@ -471,14 +505,15 @@ class Stats():
         tb6_tr1 = recipe.tr()
         tb6_tr1 <= recipe.td("&nbsp;")
         tb6_tr1 <= recipe.td("<strong>Nick</strong>", Class="tdtop")
-        tb6_tr1 <= recipe.td("<strong>Avg Chars Per Line</strong>",Class="tdtop")
+        tb6_tr1 <= recipe.td("<strong>Avg Chars Per Line</strong>",
+                Class="tdtop")
         tb6 <= tb6_tr1
 
         while j < 10:
             tr_temp = recipe.tr()
             nick = c[j]
             chars_per_line_per_user = self.avg_chars[nick]
-            tr_temp <= recipe.td("%d" % (j+1), Class="rankc")
+            tr_temp <= recipe.td("%d" % (j + 1), Class="rankc")
             tr_temp <= recipe.td("%s" % (nick), Class="c1")
             tr_temp <= recipe.td("%d" % (chars_per_line_per_user), Class="bf")
             tb6 <= tr_temp
@@ -489,9 +524,12 @@ class Stats():
         spn <= recipe.br()
         spn <= "Stats generator by <a href='https://yanovich.net/'>yano</a>.\n"
         spn <= recipe.br()
-        spn <= 'Theming heavily borrowed from the pisg project: <a href="http://pisg.sourceforge.net/">pisg</a>.\n'
+        spn <= 'Theming heavily borrowed from the pisg project:\
+                <a href="http://pisg.sourceforge.net/">pisg</a>.\n'
         spn <= recipe.br()
-        spn <= 'pisg by <a href="http://mbrix.dk/" title="Go to the authors homepage" class="background">Morten Brix Pedersen</a> and others\n'
+        spn <= 'pisg by <a href="http://mbrix.dk/" title="Go to the authors\
+                homepage" class="background">Morten Brix Pedersen</a> and\
+                others\n'
         div1 <= spn
 
         body <= div1
@@ -510,15 +548,18 @@ def main():
     """
 
     ## parser code
-    parser = argparse.ArgumentParser(description="The script makes an HTML page from IRC logs.")
+    parser = argparse.ArgumentParser(description="The script makes an HTML\
+            page from IRC logs.")
     parser.add_argument('-u', action='store', required=True, dest="user",
             help="specifies the user who is creating the logs.")
     parser.add_argument('-c', action='store', required=True, dest="channel",
             help="specifies the IRC channel of the logs.")
-    parser.add_argument('-e', action='store', required=True, dest="file_extension",
-            help="specifies the file extension of the IRC logs.")
-    parser.add_argument('-l', action='store', required=True, dest="log_location",
-            help="specifies the location of the IRC logs.")
+    parser.add_argument('-e', action='store', required=True,
+            dest="file_extension", help="specifies the file extension of the\
+                    IRC logs.")
+    parser.add_argument('-l', action='store', required=True,
+            dest="log_location", help="specifies the location of the IRC\
+                    logs.")
     parser.add_argument('-s', action='store', dest="stats_location",
             help="specifies the location of the index.html")
     results = parser.parse_args()
@@ -535,7 +576,7 @@ def main():
             try:
                 os.mkdir(stats.logs_location + "/stats/")
             except:
-                print "Failed to create folder 'stats' in, ", stats.logs_location
+                print "Failed to create 'stats' folder, ", stats.logs_location
         stats.stats_location = stats.logs_location + "/stats/"
 
     ## start computing
