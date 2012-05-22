@@ -73,8 +73,8 @@ class Stats():
 
     def load_lines(self):
         """
-        This function loads data into several class-wide available variables
-        for later computation.
+        This function loads data into several class-wide available
+        variables for later computation.
         """
         for each in os.listdir(self.logs_location):
             self.days += 1
@@ -354,9 +354,10 @@ class Stats():
         div1 <= "\nStatistics generated on %s UTC\n" % (ct)
 
         div1 <= recipe.br()
-        div1 <= "During this %d-day reporting period,\
-a total of <b>%d</b> different nicks were represented on\
-%s." % (self.days, len(self.lines_of_each_nick), self.channel)
+        div1 <= "During this %d-day reporting period," % (self.days)
+        div1 <= " a total of <b>%d</b>" % (len(self.lines_of_each_nick))
+        div1 <= " different nicks were represented on"
+        div1 <= "%s." % (self.channel)
         div1 <= recipe.br()
         div1 <= recipe.br()
         tb1 = recipe.table(Class="tb4")
@@ -383,9 +384,9 @@ a total of <b>%d</b> different nicks were represented on\
             percent = float(self.hours[hour]) / TOTAL * 100.0
             height = 12.2 * percent
             alt = self.hours[hour]
-            src = '{0:.2f}% <br><img src="images/{1}-v.png" style="width:15px;\
-height: {2}px;" alt="{3}" title="{3}" />'.format(percent,
-                            colour, height, alt)
+            src = '{0:.2f}% <br><img src="images/{1}-v.png" style="width:15px;'
+            src += ' height: {2}px;" alt="{3}" title="{3}" />'
+            src = src.format(percent, colour, int(round(height)), alt)
             td = recipe.td(src, Class="asmall2")
             tr2 <= td
 
@@ -405,14 +406,11 @@ height: {2}px;" alt="{3}" title="{3}" />'.format(percent,
 
         tb3 = recipe.table(Class="tb3")
         tr3a = recipe.tr()
-        tr3a <= recipe.td('<img src="images/blue-h.png" alt="0-5"\
-class="bars" /> = 0-5', Class="asmall")
-        tr3a <= recipe.td('<img src="images/green-h.png" alt="6-11"\
-class="bars" /> = 6-11', Class="asmall")
-        tr3a <= recipe.td('<img src="images/yellow-h.png" alt="12-17"\
-class="bars" /> = 12-17', Class="asmall")
-        tr3a <= recipe.td('<img src="images/red-h.png" alt="18-23"\
-class="bars" /> = 18-23', Class="asmall")
+        base_img = '<img src="images/{0}-h.png" alt="{1}" class="bars" /> = {1}'
+        tr3a <= recipe.td(base_img.format("blue", "0-5"), Class="asmall")
+        tr3a <= recipe.td(base_img.format("green", "6-11"), Class="asmall")
+        tr3a <= recipe.td(base_img.format("yellow", "12-17"), Class="asmall")
+        tr3a <= recipe.td(base_img.format("red", "18-23"), Class="asmall")
         tb3 <= tr3a
         div1 <= tb3
         ## END OF TABLE3
@@ -488,15 +486,21 @@ class="bars" /> = 18-23', Class="asmall")
                     }
             tb5_td1 = recipe.td(Class="bb")
             for var in ["blue", "green", "yellow", "red"]:
-                tb5_td1 <= '<img src="images/%s-h.png" width="%d" height="15"\
-alt="%d" title="%d" />' % (var, li_vars[var][0], li_vars[var][0],
-                    li_vars[var][1])
+                tb5_base = '<img src="images/{0}-h.png" width="{1}"'
+                tb5_base += ' height="15" alt="{1}" title="{2}" />'
+                #tb5_td1 <= '<img src="images/%s-h.png" width="%d" height="15"\
+#alt="%d" title="%d" />' % (var, li_vars[var][0], li_vars[var][0],
+                    #li_vars[var][1])
+                tb5_td1 <= tb5_base.format(var, int(round(li_vars[var][0])),
+                        li_vars[var][1])
             tb5_tr2 <= tb5_td1
             tb5_tr2 <= recipe.td(str(self.words_per_nick[nick]), Class="bf")
             list_of_nick_lines = [self.lines_of_each_nick[nick][each] for \
                     each in self.lines_of_each_nick[nick]]
             tb5_tr2 <= recipe.td("%s" % (diff), Class="bf")  # last seen
-            tb5_tr2 <= recipe.td("%s" % (random.choice(list_of_nick_lines)),
+            rline = random.choice(list_of_nick_lines)
+            rline = rline.replace("&", "&amp;")
+            tb5_tr2 <= recipe.td("%s" % (rline),
                     Class="bf")  # random quote
             tb5_tr2 <= recipe.td("%.2f" % (self.avg_chars[nick]), Class="bf")
             tb5 <= tb5_tr2
