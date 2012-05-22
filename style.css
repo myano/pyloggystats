@@ -125,7 +125,7 @@ a.background:hover {
 
 /* TABLES */
 table.tb1 {
-    width: 520px;
+    width: 500px;
     padding: 2px 2px 2px 2px;
     border-spacing: 10pt;
     border-width: 0px 0px 0px 0px;
@@ -136,7 +136,7 @@ table.tb1 {
 table.tb2 {
     border-width: 0px 0px 0px 0px;
     text-align: center;
-    width: 520px;
+    width: 500px;
     margin-left:auto; 
     margin-right:auto;
 }
@@ -144,13 +144,13 @@ table.tb2 {
 table.tb3 {
     border-width: 0px 0px 0px 0px;
     text-align: center;
-    width: 520px;
+    width: 500px;
     margin-left:auto; 
     margin-right:auto;
 }
 
 table.tb4 {
-    width: 600px;
+    width: 820px;
     margin-left:auto; 
     margin-right:auto;
     border: 1px solid #000;
@@ -184,7 +184,7 @@ img.bars {
 }
 
 DIV.centered {
-    width:1000px;
+    width:820px;
     margin:0px auto;
     text-align:center;
 }
