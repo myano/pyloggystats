@@ -54,6 +54,7 @@ class Stats():
         self.user_hours = dict()
         self.avg_chars = dict()
         self.words_per_nick = dict()
+        self.most_used_words = dict()
         self.user = ""
         self.channel = ""
         self.file_extension = ""
@@ -304,14 +305,19 @@ class Stats():
             results[nick] = float(tmp) / len(self.lines_of_each_nick[nick])
         self.avg_chars = results
 
-    def number_of_words_per_nick(self):
+    def words_generator(self):
         re_word = re.compile(r"(\w+)")
         for nick in self.lines_of_each_nick:
             if nick not in self.words_per_nick:
                 self.words_per_nick[nick] = 0
             for ts in self.lines_of_each_nick[nick]:
                 temp = self.lines_of_each_nick[nick][ts]
-                num_of_words = len(re_word.findall(temp))
+                list_of_words = re_word.findall(temp)
+                for word in list_of_words:
+                    if word not in self.most_used_words:
+                        self.most_used_words[word] = 0
+                    self.most_used_words[word] += 1
+                num_of_words = len(list_of_words)
                 self.words_per_nick[nick] += num_of_words
 
     def generate_lines_per_hour_per_user(self):
@@ -327,7 +333,7 @@ class Stats():
     def generate_webpage(self):
         self.delete_existing_html()
         loc = self.stats_location + "/index.html"
-        self.number_of_words_per_nick()
+        self.words_generator()
         try:
             page_file = open(loc, "w")
         except:
@@ -533,7 +539,43 @@ class Stats():
             tr_temp <= recipe.td("%d" % (chars_per_line_per_user), Class="bf")
             tb6 <= tr_temp
             j += 1
+        ## END of TABLE6
         div1 <= tb6
+
+        ## Header for Most Used Words
+        div1 <= recipe.br()
+        tb4 = recipe.table(Class="tb4")
+        tr4a = recipe.tr(recipe.td("Most Used Words",
+            Class="headertext"))
+        tb4 <= tr4a
+        div1 <= tb4
+        div1 <= recipe.br()
+
+        ## Ranking of most used words
+        ## BEGINNING OF TABLE7
+        tb7 = recipe.table(Class="tb7")
+        muw = sorted(self.most_used_words, key=self.most_used_words.get)
+        muw.reverse()
+        m = 0
+        tb7_tr1 = recipe.tr()
+        tb7_tr1 <= recipe.td("&nbsp;")
+        tb7_tr1 <= recipe.td("<strong>Word</strong>", Class="tdtop")
+        tb7_tr1 <= recipe.td("<strong>Number of occuranes</strong>",
+                Class="tdtop")
+        tb7 <= tb7_tr1
+
+        while m < 10:
+            tr_temp = recipe.tr()
+            word = muw[m]
+            tr_temp <= recipe.td("%d" % (m + 1), Class="rankc")
+            tr_temp <= recipe.td("%s" % (word), Class="c1")
+            tr_temp <= recipe.td("%s" % (self.most_used_words[word]),
+                    Class="bf")
+            tb7 <= tr_temp
+            m += 1
+
+        ## END OF TABLE7
+        div1 <= tb7
 
         spn = recipe.span(Class='small')
         spn <= recipe.br()

@@ -160,7 +160,14 @@ table.tb4 {
 table.tb6 {
     border-width: 0px 0px 0px 0px;
     text-align: center;
-    width: 200px;
+    width: 820px;
+    margin-left:auto;
+    margin-right:auto;
+}
+table.tb7 {
+    border-width: 0px 0px 0px 0px;
+    text-align: center;
+    width: 820px;
     margin-left:auto;
     margin-right:auto;
 }
