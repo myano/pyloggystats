@@ -265,13 +265,43 @@ class Stats():
     def list_of_nicks(self):
         return self.lines_of_each_nick.keys()
 
-    def number_of_lines_per_hour(self):
+    def generate_whole_stats(self):
+        results = dict()
+        re_word = re.compile(r"(\w+)")
         for nick in self.lines_of_each_nick:
+            tmp = 0
+            ## generate words_per_nick
+            if nick not in self.words_per_nick:
+                self.words_per_nick[nick] = 0
+            ## generate activity of each hour per user
+            if nick not in self.user_hours:
+                self.user_hours[nick] = dict()
             for line in self.lines_of_each_nick[nick]:
+                ## generate number_of_lines_per_hour
                 hour = int(line[11:13])
                 if hour not in self.hours:
                     self.hours[hour] = 0
                 self.hours[hour] += 1
+
+                ## generate avg_chars_per_line_per_user
+                tmp += len(self.lines_of_each_nick[nick][line])
+                results[nick] = float(tmp) / len(self.lines_of_each_nick[nick])
+
+                ## generate most_used_words
+                temp = self.lines_of_each_nick[nick][line]
+                list_of_words = re_word.findall(temp)
+                for word in list_of_words:
+                    if word not in self.most_used_words:
+                        self.most_used_words[word] = 0
+                    self.most_used_words[word] += 1
+                num_of_words = len(list_of_words)
+                self.words_per_nick[nick] += num_of_words
+
+                ## generate acitivty of each hour per user
+                if hour not in self.user_hours[nick]:
+                    self.user_hours[nick][hour] = 0
+                self.user_hours[nick][hour] += 1
+        self.avg_chars = results
 
     def sortdicts(self, x, y):
         return len(self.lines_of_each_nick[x]) - \
@@ -296,44 +326,10 @@ class Stats():
             except:
                 print "Unable to remove old index.html:", loc
 
-    def avg_chars_per_line_per_user(self):
-        results = dict()
-        for nick in self.lines_of_each_nick:
-            tmp = 0
-            for line in self.lines_of_each_nick[nick]:
-                tmp += len(self.lines_of_each_nick[nick][line])
-            results[nick] = float(tmp) / len(self.lines_of_each_nick[nick])
-        self.avg_chars = results
-
-    def words_generator(self):
-        re_word = re.compile(r"(\w+)")
-        for nick in self.lines_of_each_nick:
-            if nick not in self.words_per_nick:
-                self.words_per_nick[nick] = 0
-            for ts in self.lines_of_each_nick[nick]:
-                temp = self.lines_of_each_nick[nick][ts]
-                list_of_words = re_word.findall(temp)
-                for word in list_of_words:
-                    if word not in self.most_used_words:
-                        self.most_used_words[word] = 0
-                    self.most_used_words[word] += 1
-                num_of_words = len(list_of_words)
-                self.words_per_nick[nick] += num_of_words
-
-    def generate_lines_per_hour_per_user(self):
-        for nick in self.lines_of_each_nick:
-            if nick not in self.user_hours:
-                self.user_hours[nick] = dict()
-            for line in self.lines_of_each_nick[nick]:
-                hour = line[11:13]
-                if hour not in self.user_hours[nick]:
-                    self.user_hours[nick][hour] = 0
-                self.user_hours[nick][hour] += 1
-
     def generate_webpage(self):
         self.delete_existing_html()
         loc = self.stats_location + "/index.html"
-        self.words_generator()
+        #self.words_generator()
         try:
             page_file = open(loc, "w")
         except:
@@ -359,8 +355,8 @@ class Stats():
 
         div1 <= recipe.br()
         div1 <= "During this %d-day reporting period,\
-                a total of <b>%d</b> different nicks were represented on\
-                %s." % (self.days, len(self.lines_of_each_nick), self.channel)
+a total of <b>%d</b> different nicks were represented on\
+%s." % (self.days, len(self.lines_of_each_nick), self.channel)
         div1 <= recipe.br()
         div1 <= recipe.br()
         tb1 = recipe.table(Class="tb4")
@@ -388,7 +384,7 @@ class Stats():
             height = 12.2 * percent
             alt = self.hours[hour]
             src = '{0:.2f}% <br><img src="images/{1}-v.png" style="width:15px;\
-                    height: {2}px;" alt="{3}" title="{3}" />'.format(percent,
+height: {2}px;" alt="{3}" title="{3}" />'.format(percent,
                             colour, height, alt)
             td = recipe.td(src, Class="asmall2")
             tr2 <= td
@@ -410,19 +406,19 @@ class Stats():
         tb3 = recipe.table(Class="tb3")
         tr3a = recipe.tr()
         tr3a <= recipe.td('<img src="images/blue-h.png" alt="0-5"\
-                class="bars" /> = 0-5', Class="asmall")
+class="bars" /> = 0-5', Class="asmall")
         tr3a <= recipe.td('<img src="images/green-h.png" alt="6-11"\
-                class="bars" /> = 6-11', Class="asmall")
+class="bars" /> = 6-11', Class="asmall")
         tr3a <= recipe.td('<img src="images/yellow-h.png" alt="12-17"\
-                class="bars" /> = 12-17', Class="asmall")
+class="bars" /> = 12-17', Class="asmall")
         tr3a <= recipe.td('<img src="images/red-h.png" alt="18-23"\
-                class="bars" /> = 18-23', Class="asmall")
+class="bars" /> = 18-23', Class="asmall")
         tb3 <= tr3a
         div1 <= tb3
         ## END OF TABLE3
 
         ## Most Active Nicks
-        self.generate_lines_per_hour_per_user()
+        #self.generate_lines_per_hour_per_user()
 
         div1 <= recipe.br()
         tb4 = recipe.table(Class="tb4")
@@ -493,8 +489,8 @@ class Stats():
             tb5_td1 = recipe.td(Class="bb")
             for var in ["blue", "green", "yellow", "red"]:
                 tb5_td1 <= '<img src="images/%s-h.png" width="%d" height="15"\
-                        alt="%d" title="%d" />' % (var, li_vars[var][0],
-                                li_vars[var][0], li_vars[var][1])
+alt="%d" title="%d" />' % (var, li_vars[var][0], li_vars[var][0],
+                    li_vars[var][1])
             tb5_tr2 <= tb5_td1
             tb5_tr2 <= recipe.td(str(self.words_per_nick[nick]), Class="bf")
             list_of_nick_lines = [self.lines_of_each_nick[nick][each] for \
@@ -582,11 +578,10 @@ class Stats():
         spn <= "Stats generator by <a href='https://yanovich.net/'>yano</a>.\n"
         spn <= recipe.br()
         spn <= 'Theming heavily borrowed from the pisg project:\
-                <a href="http://pisg.sourceforge.net/">pisg</a>.\n'
+<a href="http://pisg.sourceforge.net/">pisg</a>.\n'
         spn <= recipe.br()
         spn <= 'pisg by <a href="http://mbrix.dk/" title="Go to the authors\
-                homepage" class="background">Morten Brix Pedersen</a> and\
-                others\n'
+homepage" class="background">Morten Brix Pedersen</a> and others\n'
         div1 <= spn
 
         body <= div1
@@ -639,8 +634,9 @@ def main():
     ## start computing
     if stats.check_for_logs():
         stats.load_lines()
-        stats.number_of_lines_per_hour()
-        stats.avg_chars_per_line_per_user()
+        #stats.number_of_lines_per_hour()
+        #stats.avg_chars_per_line_per_user()
+        stats.generate_whole_stats()
         stats.generate_webpage()
 
 if __name__ == '__main__':
